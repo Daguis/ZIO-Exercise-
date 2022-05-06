@@ -169,25 +169,7 @@ object UsingZIOStreams extends ZIOAppDefault {
     }
 
     object Implicits {
-      import zio.prelude.Associative
       import Classifications.InUse
-      implicit val ordersCombinator: Associative[OrdersAmount] =
-        new Associative[OrdersAmount] {
-          override def combine(
-              l: => OrdersAmount,
-              r: => OrdersAmount
-          ): OrdersAmount =
-            OrdersAmount(l.amount + r.amount)
-        }
-      implicit val aggCombinator: Associative[Proyection] =
-        new Associative[Proyection] {
-          override def combine(
-              l: => Proyection,
-              r: => Proyection
-          ): Proyection = {
-            Proyection(l.state ++ r.state)
-          }
-        }
 
       implicit val sorting = new Ordering[InUse] {
         val ordering = Seq(
@@ -212,14 +194,14 @@ object UsingZIOStreams extends ZIOAppDefault {
         .map { case (month, votes) =>
           YearMonth.now - month -> votes
         }
-        .groupMapReduce(_._1) { _._2.amount } { _ + _ }
         .map { case (month, ordersAmount) =>
           Classifications.apply(month.totalMonths) -> ordersAmount
         }
-        .toSeq
         .collect { case (Right(value), ordersAmount) =>
           value -> ordersAmount
         }
+        .groupMapReduce(_._1)(_._2.amount)(_ + _)
+        .toSeq
         .sortBy(_._1)
   }
 
