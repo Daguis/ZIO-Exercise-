@@ -120,6 +120,8 @@ object UsingZIOStreams extends ZIOAppDefault {
     case class OrdersAmount(amount: BigInt)
     case class Proyection(state: Seq[(YearMonth, OrdersAmount)])
 
+    sealed trait Classifications
+
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
