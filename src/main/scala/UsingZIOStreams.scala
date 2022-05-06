@@ -251,7 +251,27 @@ object UsingZIOStreams extends ZIOAppDefault {
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
-    ZIO.never
+
+    for {
+      readsideProyection <- Ref.make(Readside.Proyection.empty)
+      repository = OrderRepositoryMock.stream
+      application = Application.apply(
+        writeside = Writeside.apply(repository),
+        readside = readsideProyection
+      )
+      running <- application.runDrain.forkScoped.interruptible
+      _ <- Console.readLine(prompt = "Press any key to stop \n")
+      _ <- running.interrupt
+      readsideState <- readsideProyection.get
+      _ <- Console.printLine(
+        Readside
+          .summary(readsideState)
+          .map { case (months, orders) =>
+            s"$months months: $orders orders"
+          }
+          .mkString("\n")
+      )
+    } yield ()
   }
 
 }
