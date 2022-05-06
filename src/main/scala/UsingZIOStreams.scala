@@ -72,6 +72,10 @@ object UsingZIOStreams extends ZIOAppDefault {
     )
   }
 
+  trait ProductRepository {
+    def get(productId: ProductId): Option[Product]
+  }
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
