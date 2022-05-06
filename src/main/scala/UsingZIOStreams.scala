@@ -146,6 +146,11 @@ object UsingZIOStreams extends ZIOAppDefault {
 
     // data transfer objects operations
     object Proyection { def empty = Proyection(Seq.empty) }
+    object YearMonth {
+      def apply(now: java.time.YearMonth): YearMonth =
+        YearMonth(now.getYear, now.getMonthValue)
+      def now = YearMonth(java.time.YearMonth.now())
+    }
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
