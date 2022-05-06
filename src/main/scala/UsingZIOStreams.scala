@@ -114,6 +114,8 @@ object UsingZIOStreams extends ZIOAppDefault {
 
   }
 
+  object Readside {}
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
