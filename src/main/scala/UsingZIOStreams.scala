@@ -206,6 +206,21 @@ object UsingZIOStreams extends ZIOAppDefault {
       }
     }
     import Implicits._
+
+    def summary: Proyection => Seq[(Classifications.InUse, BigInt)] =
+      _.state
+        .map { case (month, votes) =>
+          YearMonth.now - month -> votes
+        }
+        .groupMapReduce(_._1) { _._2.amount } { _ + _ }
+        .map { case (month, ordersAmount) =>
+          Classifications.apply(month.totalMonths) -> ordersAmount
+        }
+        .toSeq
+        .collect { case (Right(value), ordersAmount) =>
+          value -> ordersAmount
+        }
+        .sortBy(_._1)
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
