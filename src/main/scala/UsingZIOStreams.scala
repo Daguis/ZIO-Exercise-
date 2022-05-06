@@ -114,7 +114,10 @@ object UsingZIOStreams extends ZIOAppDefault {
 
   }
 
-  object Readside {}
+  object Readside {
+
+    case class YearMonth(year: Int, month: Int)
+  }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
