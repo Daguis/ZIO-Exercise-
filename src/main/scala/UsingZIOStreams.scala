@@ -223,7 +223,32 @@ object UsingZIOStreams extends ZIOAppDefault {
         .sortBy(_._1)
   }
 
-  object Application {}
+  object Application {
+
+    def inject(
+        state: Ref[Readside.Proyection]
+    ): Writeside.State => UIO[Readside.Proyection] = {
+      def translation: Writeside.State => Readside.Proyection =
+        processorAgg =>
+          Readside.Proyection(
+            processorAgg.state.toSeq.map { case (yearMonth, amount) =>
+              Readside.YearMonth(yearMonth) -> Readside.OrdersAmount(amount)
+            }
+          )
+
+      { batch: Writeside.State =>
+        state.getAndUpdate { state =>
+          Readside.Proyection(state.state ++ translation(batch).state)
+        }
+      }
+    }
+
+    type Write = ZStream[Any, Nothing, Writeside.State]
+    type Read = Ref[Readside.Proyection]
+    def apply(writeside: Write, readside: Read) = {
+      writeside.mapZIO(inject(readside))
+    }
+  }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
