@@ -18,6 +18,11 @@ object UsingZIOStreams extends ZIOAppDefault {
       val r = new scala.util.Random();
       r // r.setSeed(0); r
     }
+
+    def id(name: String): Generator[String] =
+      new Generator[String] {
+        override def next: String = s"$name-${random.nextInt()}"
+      }
   }
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
