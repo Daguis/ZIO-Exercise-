@@ -118,7 +118,7 @@ object UsingZIOStreams extends ZIOAppDefault {
 
     case class YearMonth(year: Int, month: Int)
     case class OrdersAmount(amount: BigInt)
-    case class Proyection(state: Seq[(YearMonth, OrdersAmount)])
+    case class Proyection(state: Map[YearMonth, OrdersAmount])
 
     sealed trait Classifications
     object Classifications {
@@ -145,7 +145,7 @@ object UsingZIOStreams extends ZIOAppDefault {
     }
 
     // data transfer objects operations
-    object Proyection { def empty = Proyection(Seq.empty) }
+    object Proyection { def empty = Proyection(Map.empty) }
     object YearMonth {
       def apply(now: java.time.YearMonth): YearMonth =
         YearMonth(now.getYear, now.getMonthValue)
@@ -169,7 +169,25 @@ object UsingZIOStreams extends ZIOAppDefault {
     }
 
     object Implicits {
+      import zio.prelude.Associative
       import Classifications.InUse
+      implicit val ordersCombinator: Associative[OrdersAmount] =
+        new Associative[OrdersAmount] {
+          override def combine(
+              l: => OrdersAmount,
+              r: => OrdersAmount
+          ): OrdersAmount =
+            OrdersAmount(l.amount + r.amount)
+        }
+      implicit val aggCombinator: Associative[Proyection] =
+        new Associative[Proyection] {
+          override def combine(
+              l: => Proyection,
+              r: => Proyection
+          ): Proyection = {
+            Proyection(l.state ++ r.state)
+          }
+        }
 
       implicit val sorting = new Ordering[InUse] {
         val ordering = Seq(
@@ -190,7 +208,7 @@ object UsingZIOStreams extends ZIOAppDefault {
     import Implicits._
 
     def summary: Proyection => Seq[(Classifications.InUse, BigInt)] =
-      _.state
+      _.state.toSeq
         .map { case (month, votes) =>
           YearMonth.now - month -> votes
         }
@@ -210,17 +228,19 @@ object UsingZIOStreams extends ZIOAppDefault {
     def inject(
         state: Ref[Readside.Proyection]
     ): Writeside.State => UIO[Readside.Proyection] = {
+      import Readside.Implicits._
+      import zio.prelude._
       def translation: Writeside.State => Readside.Proyection =
         processorAgg =>
           Readside.Proyection(
-            processorAgg.state.toSeq.map { case (yearMonth, amount) =>
+            processorAgg.state.map { case (yearMonth, amount) =>
               Readside.YearMonth(yearMonth) -> Readside.OrdersAmount(amount)
             }
           )
 
       { batch: Writeside.State =>
         state.getAndUpdate { state =>
-          Readside.Proyection(state.state ++ translation(batch).state)
+          Readside.Proyection(state.state <> translation(batch).state)
         }
       }
     }
