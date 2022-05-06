@@ -117,6 +117,7 @@ object UsingZIOStreams extends ZIOAppDefault {
   object Readside {
 
     case class YearMonth(year: Int, month: Int)
+    case class OrdersAmount(amount: BigInt)
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
