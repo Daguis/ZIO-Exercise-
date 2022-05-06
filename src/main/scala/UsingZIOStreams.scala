@@ -23,6 +23,19 @@ object UsingZIOStreams extends ZIOAppDefault {
       new Generator[String] {
         override def next: String = s"$name-${random.nextInt()}"
       }
+
+    object product extends Generator[Product] {
+      implicit val id = new Generator[ProductId] {
+        override def next: ProductId =
+          ProductId(Generator.id("product").next)
+      }
+      override def next: Product =
+        Product(
+          id = id.next,
+          createdAt = java.time.YearMonth.now minusMonths random.between(1, 24)
+        )
+
+    }
   }
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
