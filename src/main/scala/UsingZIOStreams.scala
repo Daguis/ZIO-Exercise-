@@ -81,7 +81,11 @@ object UsingZIOStreams extends ZIOAppDefault {
       Some(Generator.product.next)
   }
 
-  object Writeside {}
+  object Writeside {
+
+    case class State(state: Map[java.time.YearMonth, BigInt])
+
+  }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
