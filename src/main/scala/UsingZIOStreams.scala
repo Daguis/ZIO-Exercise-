@@ -36,6 +36,18 @@ object UsingZIOStreams extends ZIOAppDefault {
         )
 
     }
+
+    object item extends Generator[Item] {
+      implicit val id = new Generator[ItemId] {
+        override def next: ItemId =
+          ItemId(Generator.id("item").next)
+      }
+      override def next: Item =
+        Item(
+          id = id.next,
+          productId = product.id.next
+        )
+    }
   }
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
