@@ -61,6 +61,11 @@ object UsingZIOStreams extends ZIOAppDefault {
         )
     }
   }
+
+  trait OrderRepository {
+    val stream: zio.stream.Stream[Unit, Order]
+  }
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
