@@ -118,6 +118,8 @@ object UsingZIOStreams extends ZIOAppDefault {
 
     case class YearMonth(year: Int, month: Int)
     case class OrdersAmount(amount: BigInt)
+    case class Proyection(state: Seq[(YearMonth, OrdersAmount)])
+
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
