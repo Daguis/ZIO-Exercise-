@@ -223,6 +223,8 @@ object UsingZIOStreams extends ZIOAppDefault {
         .sortBy(_._1)
   }
 
+  object Application {}
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
