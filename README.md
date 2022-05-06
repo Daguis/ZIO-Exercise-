@@ -20,7 +20,7 @@ that older products are still being sold.
 
 Example;
 
-$ java -jar 0.0.0.jar "2018-01-01 00:00:00" "2019-01-01 00:00:00"
+$ java -jar 0.0.0.jar 
 
 Result:
 ```scala
