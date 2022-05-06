@@ -121,7 +121,28 @@ object UsingZIOStreams extends ZIOAppDefault {
     case class Proyection(state: Seq[(YearMonth, OrdersAmount)])
 
     sealed trait Classifications
-
+    object Classifications {
+      sealed trait Unused extends Classifications
+      object Unused {
+        case object `< 1` extends Unused
+      }
+      sealed trait InUse extends Classifications
+      object InUse {
+        case object `1-3` extends InUse
+        case object `4-6` extends InUse
+        case object `7-12` extends InUse
+        case object `> 12` extends InUse
+      }
+      import Unused._
+      import InUse._
+      def apply: Int => Either[Unused, InUse] = {
+        case m if m == 1 || m <= 3  => Right(`1-3`)
+        case m if m == 4 || m <= 6  => Right(`4-6`)
+        case m if m == 7 || m <= 12 => Right(`7-12`)
+        case m if m > 12            => Right(`> 12`)
+        case m if m < 1             => Left(`< 1`)
+      }
+    }
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
