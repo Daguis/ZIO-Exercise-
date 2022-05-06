@@ -81,6 +81,8 @@ object UsingZIOStreams extends ZIOAppDefault {
       Some(Generator.product.next)
   }
 
+  object Writeside {}
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
