@@ -76,6 +76,11 @@ object UsingZIOStreams extends ZIOAppDefault {
     def get(productId: ProductId): Option[Product]
   }
 
+  case object ProductRepositoryMock extends ProductRepository {
+    override def get(productId: ProductId): Option[Product] =
+      Some(Generator.product.next)
+  }
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
