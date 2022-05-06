@@ -66,6 +66,12 @@ object UsingZIOStreams extends ZIOAppDefault {
     val stream: zio.stream.Stream[Unit, Order]
   }
 
+  case object OrderRepositoryMock extends OrderRepository {
+    val stream = zio.stream.ZStream.repeat(
+      Generator.order.next
+    )
+  }
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
