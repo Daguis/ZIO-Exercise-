@@ -87,6 +87,31 @@ object UsingZIOStreams extends ZIOAppDefault {
     object State { def empty = State(Map.empty) }
 
     type Pipeline[A, B] = ZStream[Any, Nothing, A] => ZStream[Any, Nothing, B]
+    def apply: Pipeline[Order, State] = { stream =>
+      (
+        for {
+          order <- stream
+          minYearMonthOfOrder = order.items
+            .map(_._2.productId)
+            .map(ProductRepositoryMock.get)
+            .collect { case Some(value) => value }
+            .map(_.createdAt)
+            .min
+        } yield order.id -> minYearMonthOfOrder
+      )
+        .aggregateAsyncWithin(
+          ZSink.fold[(OrderId, java.time.YearMonth), State](State.empty)(
+            _.state.size < 1024
+          ) { case (acc, tuple) =>
+            acc.state.get(tuple._2) match {
+              case Some(value) => State(acc.state + ((tuple._2, value + 1)))
+              case None        => State(acc.state + ((tuple._2, 1)))
+            }
+          },
+          Schedule.spaced(1.seconds)
+        )
+    }
+
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
