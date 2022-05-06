@@ -84,6 +84,7 @@ object UsingZIOStreams extends ZIOAppDefault {
   object Writeside {
 
     case class State(state: Map[java.time.YearMonth, BigInt])
+    object State { def empty = State(Map.empty) }
 
   }
 
