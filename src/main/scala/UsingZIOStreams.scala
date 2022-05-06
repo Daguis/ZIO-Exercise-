@@ -11,6 +11,9 @@ object UsingZIOStreams extends ZIOAppDefault {
   case class OrderId(id: String)
   case class Order(id: OrderId, items: Seq[(ItemId, Item)])
 
+  // generator
+  sealed trait Generator[A] { def next: A }
+
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     ZIO.never
   }
