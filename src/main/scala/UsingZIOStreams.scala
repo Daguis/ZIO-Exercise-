@@ -167,6 +167,45 @@ object UsingZIOStreams extends ZIOAppDefault {
 
       def totalMonths: Int = yearMonth.year * 12 + yearMonth.month
     }
+
+    object Implicits {
+      import zio.prelude.Associative
+      import Classifications.InUse
+      implicit val ordersCombinator: Associative[OrdersAmount] =
+        new Associative[OrdersAmount] {
+          override def combine(
+              l: => OrdersAmount,
+              r: => OrdersAmount
+          ): OrdersAmount =
+            OrdersAmount(l.amount + r.amount)
+        }
+      implicit val aggCombinator: Associative[Proyection] =
+        new Associative[Proyection] {
+          override def combine(
+              l: => Proyection,
+              r: => Proyection
+          ): Proyection = {
+            Proyection(l.state ++ r.state)
+          }
+        }
+
+      implicit val sorting = new Ordering[InUse] {
+        val ordering = Seq(
+          InUse.`1-3`,
+          InUse.`4-6`,
+          InUse.`7-12`,
+          InUse.`> 12`
+        )
+        override def compare(
+            x: InUse,
+            y: InUse
+        ): Int = {
+          def toInt: InUse => Int = m => ordering.indexOf(m)
+          toInt(x) - toInt(y)
+        }
+      }
+    }
+    import Implicits._
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
