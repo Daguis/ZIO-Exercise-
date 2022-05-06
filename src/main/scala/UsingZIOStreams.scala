@@ -212,14 +212,14 @@ object UsingZIOStreams extends ZIOAppDefault {
         .map { case (month, votes) =>
           YearMonth.now - month -> votes
         }
-        .groupMapReduce(_._1) { _._2.amount } { _ + _ }
         .map { case (month, ordersAmount) =>
           Classifications.apply(month.totalMonths) -> ordersAmount
         }
-        .toSeq
         .collect { case (Right(value), ordersAmount) =>
           value -> ordersAmount
         }
+        .groupMapReduce(_._1)(_._2.amount)(_ + _)
+        .toSeq
         .sortBy(_._1)
   }
 
