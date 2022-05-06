@@ -86,6 +86,7 @@ object UsingZIOStreams extends ZIOAppDefault {
     case class State(state: Map[java.time.YearMonth, BigInt])
     object State { def empty = State(Map.empty) }
 
+    type Pipeline[A, B] = ZStream[Any, Nothing, A] => ZStream[Any, Nothing, B]
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
