@@ -143,6 +143,9 @@ object UsingZIOStreams extends ZIOAppDefault {
         case m if m < 1             => Left(`< 1`)
       }
     }
+
+    // data transfer objects operations
+    object Proyection { def empty = Proyection(Seq.empty) }
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
