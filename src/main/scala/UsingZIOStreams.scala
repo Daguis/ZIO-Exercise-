@@ -151,6 +151,22 @@ object UsingZIOStreams extends ZIOAppDefault {
         YearMonth(now.getYear, now.getMonthValue)
       def now = YearMonth(java.time.YearMonth.now())
     }
+    implicit class YearMonthOps(yearMonth: YearMonth) {
+      def <(other: YearMonth): Boolean =
+        yearMonth.year < other.year ||
+          (yearMonth.year == other.year &&
+            yearMonth.month < other.month)
+
+      def -(other: YearMonth): YearMonth = {
+        val months = yearMonth.totalMonths - other.totalMonths
+        YearMonth(
+          months / 12,
+          months % 12
+        )
+      }
+
+      def totalMonths: Int = yearMonth.year * 12 + yearMonth.month
+    }
   }
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
